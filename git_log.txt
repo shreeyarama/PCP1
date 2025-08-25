@@ -1,0 +1,35 @@
+commit e81c8d54644d9e94adddad4e2da1a4367415f106
+Author: Shreeya Rama <rmxshr001@myuct.ac.za>
+Date:   Mon Aug 25 15:13:01 2025 +0200
+
+    Updated code
+
+commit be1091f2d0ee23377146717b480692c919f94c05
+Author: Shreeya Rama <rmxshr001@myuct.ac.za>
+Date:   Mon Aug 25 00:47:41 2025 +0200
+
+    GitLog
+
+commit b887230691c0b0ff62b090bcc23779eee99a37f8
+Author: Shreeya Rama <rmxshr001@myuct.ac.za>
+Date:   Mon Aug 25 00:44:24 2025 +0200
+
+    Makefile
+
+commit f38050f2a90fc528b4414bf059a1b4253cf984b7
+Author: Shreeya Rama <rmxshr001@myuct.ac.za>
+Date:   Mon Aug 25 00:43:41 2025 +0200
+
+    Hunter parallel coded
+
+commit 114a9aba5bac404ce0fe170be8ce1bfdd52d0f1c
+Author: Shreeya Rama <rmxshr001@myuct.ac.za>
+Date:   Mon Aug 25 00:41:51 2025 +0200
+
+    Hunt parallel coded
+
+commit 1673ce0e7183c6ac7941e6cb255fa274af5a8d06
+Author: Shreeya Rama <rmxshr001@myuct.ac.za>
+Date:   Mon Aug 25 00:39:40 2025 +0200
+
+    Dungeon Map for parallel made
