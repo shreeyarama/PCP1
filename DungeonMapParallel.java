@@ -4,20 +4,22 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
+
 public class DungeonMapParallel {
     public static final int PRECISION = 10000;
     public static final int RESOLUTION = 5;
 
     private final int rows, columns;
     private final double xmin, xmax, ymin, ymax;
-    private final int [][] manaMap;   // lazy cache
-    private final int [][] visit;     // -1 = unvisited; else = search id (viz only)
-    private int dungeonGridPointsEvaluated;
+    private final int [][] manaMap;
+    private final int [][] visit;
+    private int dungeonGridPointsEvaluated; 
 
     private final double bossX, bossY, decayFactor;
 
     public DungeonMapParallel(double xmin, double xmax, double ymin, double ymax, int seed) {
         this.xmin = xmin; this.xmax = xmax; this.ymin = ymin; this.ymax = ymax;
+
         this.rows    = (int)Math.round((xmax - xmin) * RESOLUTION);
         this.columns = (int)Math.round((ymax - ymin) * RESOLUTION);
 
@@ -25,11 +27,12 @@ public class DungeonMapParallel {
         visit   = new int[rows][columns];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                manaMap[i][j] = Integer.MIN_VALUE;
-                visit[i][j] = -1;
+                manaMap[i][j] = Integer.MIN_VALUE; 
+                visit[i][j] = -1; // unvisited
             }
         }
 
+        // Random
         Random r = new Random(seed);
         double bx = 0.35 + 0.30 * r.nextDouble();
         double by = 0.35 + 0.30 * r.nextDouble();
@@ -39,17 +42,20 @@ public class DungeonMapParallel {
     }
 
     public boolean visited(int x, int y) { return visit[x][y] != -1; }
-    public void setVisited(int x, int y, int id) { if (visit[x][y] == -1) visit[x][y] = id; }
+    public void setVisited(int x, int y, int id) { 
+        if (visit[x][y] == -1) visit[x][y] = id; 
+    }
 
     public int getManaLevel(int x, int y) {
         if (manaMap[x][y] != Integer.MIN_VALUE) return manaMap[x][y];
 
         double xCoord = xmin + ((xmax - xmin) / rows) * x;
         double yCoord = ymin + ((ymax - ymin) / columns) * y;
+
         double dx = xCoord - bossX, dy = yCoord - bossY;
         double d2 = dx*dx + dy*dy;
 
-        // Mana function (keep exact)
+        //
         double mana =
             (2 * Math.sin(xCoord + 0.1 * Math.sin(yCoord / 5.0) + Math.PI / 2) *
                  Math.cos((yCoord + 0.1 * Math.cos(xCoord / 5.0) + Math.PI / 2) / 2.0)
@@ -61,7 +67,7 @@ public class DungeonMapParallel {
             + 3.0 * Math.exp(-0.03 * ((xCoord - bossX - 15)*(xCoord - bossX - 15) +
                                       (yCoord - bossY + 10)*(yCoord - bossY + 10)))
             + 8.0 * Math.exp(-decayFactor * d2)
-            + 2.0 / (1.0 + 0.05 * d2));
+            + 2.0 / (1.0 + 0.05 * d2));          
 
         int fixed = (int)(PRECISION * mana);
         manaMap[x][y] = fixed;
@@ -73,6 +79,7 @@ public class DungeonMapParallel {
         HuntParallel.Direction best = HuntParallel.Direction.STAY;
         int bestVal = getManaLevel(x, y);
 
+        // left, right, up, down, diagonals
         int[][] dxy = { {-1,0},{1,0},{0,-1},{0,1},{-1,-1},{1,-1},{-1,1},{1,1} };
         HuntParallel.Direction[] dirs = {
             HuntParallel.Direction.LEFT, HuntParallel.Direction.RIGHT,
@@ -81,6 +88,7 @@ public class DungeonMapParallel {
             HuntParallel.Direction.DOWN_LEFT, HuntParallel.Direction.DOWN_RIGHT
         };
 
+        // highest value check
         for (int i = 0; i < dxy.length; i++) {
             int nx = x + dxy[i][0], ny = y + dxy[i][1];
             if (nx >= 0 && nx < rows && ny >= 0 && ny < columns) {
@@ -91,11 +99,13 @@ public class DungeonMapParallel {
         return best;
     }
 
+   
     public void visualisePowerMap(String filename, boolean pathOnly) {
         try {
             int w = manaMap.length, h = manaMap[0].length;
             BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
 
+            // Find min and max  values 
             int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
             for (int i = 0; i < w; i++)
                 for (int j = 0; j < h; j++)
@@ -105,24 +115,30 @@ public class DungeonMapParallel {
                     }
             double range = Math.max(1.0, max - min);
 
+            //  colors to pixels
             for (int i = 0; i < w; i++) {
                 for (int j = 0; j < h; j++) {
                     Color c;
-                    if ((pathOnly && !visited(i,j)) || manaMap[i][j] == Integer.MIN_VALUE) c = Color.BLACK;
-                    else {
+                    if ((pathOnly && !visited(i,j)) || manaMap[i][j] == Integer.MIN_VALUE) {
+                        c = Color.BLACK; 
+                    } else {
                         double t = (manaMap[i][j] - min) / range;
-                        c = mapHeightToColor(t);
+                        c = mapHeightToColor(t); 
                     }
+                    
                     img.setRGB(i, h - 1 - j, c.getRGB());
                 }
             }
+
+            // Save 
             ImageIO.write(img, "png", new File(filename));
             System.out.println("map saved to " + filename);
         } catch (Exception ignored) {
-            // Keep output clean for the automarker even if image write fails.
+            
         }
     }
 
+     // - Blue → Purple → Red → White color gradient
     private Color mapHeightToColor(double t) {
         t = Math.max(0, Math.min(1, t));
         if (t < 0.33) {
@@ -136,7 +152,6 @@ public class DungeonMapParallel {
 
     public double getXcoord(int x){ return xmin + ((xmax - xmin) / rows) * x; }
     public double getYcoord(int y){ return ymin + ((ymax - ymin) / columns) * y; }
-
     public int getRows() { return rows; }
     public int getColumns() { return columns; }
     public int getGridPointsEvaluated(){ return dungeonGridPointsEvaluated; }

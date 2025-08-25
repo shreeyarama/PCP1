@@ -6,19 +6,25 @@ public class HuntParallel {
     private final DungeonMapParallel dungeon;
 
     public HuntParallel(int id, int startRow, int startCol, DungeonMapParallel dungeon) {
-        this.id = id; this.row = startRow; this.col = startCol; this.dungeon = dungeon;
+        this.id = id; 
+        this.row = startRow; 
+        this.col = startCol; 
+        this.dungeon = dungeon;
         this.steps = 0;
     }
 
-    /** Deterministic hill-climb: ignore 'visited' for stopping to avoid interleaving nondeterminism. */
+     // move in the best direction until no better cell exists 
     public int findManaPeak(boolean debug) {
         int val;
         while (true) {
             val = dungeon.getManaLevel(row, col);
-            dungeon.setVisited(row, col, id); // viz only
+            dungeon.setVisited(row, col, id);
             steps++;
+
+         
             Direction dir = dungeon.getNextStepDirection(row, col);
-            if (dir == Direction.STAY) return val;
+            if (dir == Direction.STAY) return val;  // stop if peak reached
+
             switch (dir) {
                 case LEFT: row--; break;
                 case RIGHT: row++; break;
